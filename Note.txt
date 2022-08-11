@@ -10,6 +10,7 @@
 
 
 *)
+    -> Register admin while create contract
     -> Register functionality
     -> login after get register
     -> only registered person can by the ticket and create the event

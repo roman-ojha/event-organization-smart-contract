@@ -16,7 +16,7 @@ struct User {
 
 contract EventsOrganizer {
     // Admin :
-    Admin private admin;
+    Admin admin;
 
     constructor(string memory _username, string memory _password) {
         admin.username = _username;
@@ -35,13 +35,31 @@ contract EventsOrganizer {
     // User:
 
     mapping(uint256 => User) users;
-    uint256 public noOfUsers;
+    uint256 noOfUsers;
 
-    function register(string memory _username, string memory _password) public {
+    function register(string memory _username, string memory _password)
+        public
+        returns (bool)
+    {
+        if (
+            keccak256(abi.encodePacked(admin.username)) ==
+            keccak256(abi.encodePacked(_username))
+        ) {
+            return false;
+        }
         User storage newUser = users[noOfUsers];
         noOfUsers++;
         newUser.username = _username;
         newUser.id = msg.sender;
         newUser.password = _password;
+        return true;
+    }
+
+    function getUser(uint256 _userNo)
+        public
+        view
+        returns (string memory username, address id)
+    {
+        return (users[_userNo].username, users[_userNo].id);
     }
 }
