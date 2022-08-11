@@ -15,6 +15,7 @@ struct User {
 }
 
 contract EventsOrganizer {
+    // Admin :
     Admin private admin;
 
     constructor(string memory _username, string memory _password) {
@@ -31,10 +32,16 @@ contract EventsOrganizer {
         return (admin.username, admin.id);
     }
 
-    // mapping(uint256 => User) users;
+    // User:
 
-    // function register(string memory username, string memory password)
-    //     public
-    //     view
-    // {}
+    mapping(uint256 => User) users;
+    uint256 public noOfUsers;
+
+    function register(string memory _username, string memory _password) public {
+        User storage newUser = users[noOfUsers];
+        noOfUsers++;
+        newUser.username = _username;
+        newUser.id = msg.sender;
+        newUser.password = _password;
+    }
 }
