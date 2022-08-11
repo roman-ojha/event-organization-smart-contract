@@ -1,0 +1,31 @@
+*) RoadMap:
+    *) Event:
+        1) Organizer:
+            -> who organize event
+            -> create event
+            -> distribute ticket
+        2) Attendee:
+            -> attend that event
+            -> by those ticket
+
+
+*)
+    -> Register functionality
+    -> login after get register
+    -> only registered person can by the ticket and create the event
+    -> CreateEvent
+        -> minimum ticket price
+        -> date of event
+        -> name of the event
+        -> ticket count
+    -> BuyTicket
+        -> which event
+        -> quantity
+    -> Display no of Tickets who buy it
+        -> show using buyer address
+        -> which event
+    -> Events (show detail of given event)
+    -> TransferTicket
+        -> event id
+        -> quantity to transfer
+        -> to which address
