@@ -14,6 +14,16 @@ struct User {
     string password;
 }
 
+struct Event {
+    uint256 id;
+    string name;
+    string description;
+    uint256 ticketPrice;
+    uint256 date;
+    uint256 availableSeats;
+    uint256 soldTicketNo;
+}
+
 contract EventsOrganizer {
     // Admin :
     Admin admin;
@@ -81,5 +91,31 @@ contract EventsOrganizer {
             revert("searched user doesn't exist");
         }
         return (users[_username].username, users[_username].id);
+    }
+
+    // Creating Event
+    mapping(uint256 => Event) events;
+    uint256 noOfEvent;
+
+    function createEvent(
+        string memory _name,
+        string memory _description,
+        uint256 _ticketPrice,
+        uint256 _date,
+        uint256 _availableSeats
+    ) public {
+        require(msg.sender == admin.id, "only admin can create the event");
+        Event storage newEvent = events[noOfEvent];
+        newEvent.id = noOfEvent;
+        newEvent.name = _name;
+        newEvent.description = _description;
+        newEvent.ticketPrice = _ticketPrice;
+        newEvent.date = _date;
+        newEvent.availableSeats = _availableSeats;
+        noOfEvent++;
+    }
+
+    function getEvent(uint256 id) public view returns (Event memory) {
+        return events[id];
     }
 }

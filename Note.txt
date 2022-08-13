@@ -13,7 +13,6 @@
     -> Register admin while create contract
     -> Register functionality
         -> username need to be unique
-    -> login after get register
     -> only registered person can buy the ticket and create the event
     -> CreateEvent
         -> minimum ticket price
