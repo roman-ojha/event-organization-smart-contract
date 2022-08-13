@@ -4,7 +4,7 @@ pragma solidity >=0.6.0 <0.9.0;
 
 struct Admin {
     string username;
-    address id;
+    address id; // user address
     string password;
 }
 
@@ -37,29 +37,49 @@ contract EventsOrganizer {
     mapping(string => User) users;
     uint256 noOfUsers;
 
+    // register User
     function register(string memory _username, string memory _password)
         public
-        returns (bool)
+        returns (string memory status)
     {
+        string memory userUsername = users[_username].username;
         if (
-            keccak256(abi.encodePacked(admin.username)) ==
-            keccak256(abi.encodePacked(_username))
+            keccak256(abi.encodePacked(_username)) ==
+            (keccak256(abi.encodePacked(admin.username)))
         ) {
-            return false;
+            // comparing with admin username
+            revert("username already exist, please try another one");
+        }
+        if (
+            keccak256(abi.encodePacked(_username)) ==
+            (keccak256(abi.encodePacked(userUsername)))
+        ) {
+            // comparing with users username
+            revert("username already exist, please try another one");
         }
         User storage newUser = users[_username];
         noOfUsers++;
         newUser.username = _username;
         newUser.id = msg.sender;
         newUser.password = _password;
-        return true;
+        return "register successfully";
     }
 
-    function getUser(string memory _username)
+    function searchUser(string memory _username)
         public
         view
         returns (string memory username, address id)
     {
+        if (
+            keccak256(abi.encodePacked(_username)) ==
+            (keccak256(abi.encodePacked(admin.username)))
+        ) {
+            revert("searched user is admin");
+        }
+        address userId = users[_username].id;
+        if (userId == 0x0000000000000000000000000000000000000000) {
+            revert("searched user doesn't exist");
+        }
         return (users[_username].username, users[_username].id);
     }
 }
