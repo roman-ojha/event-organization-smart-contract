@@ -34,7 +34,7 @@ contract EventsOrganizer {
 
     // User:
 
-    mapping(uint256 => User) users;
+    mapping(string => User) users;
     uint256 noOfUsers;
 
     function register(string memory _username, string memory _password)
@@ -47,7 +47,7 @@ contract EventsOrganizer {
         ) {
             return false;
         }
-        User storage newUser = users[noOfUsers];
+        User storage newUser = users[_username];
         noOfUsers++;
         newUser.username = _username;
         newUser.id = msg.sender;
@@ -55,11 +55,11 @@ contract EventsOrganizer {
         return true;
     }
 
-    function getUser(uint256 _userNo)
+    function getUser(string memory _username)
         public
         view
         returns (string memory username, address id)
     {
-        return (users[_userNo].username, users[_userNo].id);
+        return (users[_username].username, users[_username].id);
     }
 }
