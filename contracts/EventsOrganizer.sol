@@ -8,12 +8,6 @@ struct Admin {
     string password;
 }
 
-struct User {
-    string username;
-    address id;
-    string password;
-}
-
 struct Event {
     uint256 id;
     string name;
@@ -22,6 +16,19 @@ struct Event {
     uint256 date;
     uint256 availableSeats;
     uint256 soldTicketNo;
+}
+
+struct Ticket {
+    uint256 eventId;
+    uint256 quantity;
+}
+
+struct User {
+    string username;
+    address id;
+    string password;
+    mapping(uint256 => Ticket) tickets;
+    // eventId => Ticket
 }
 
 contract EventsOrganizer {
@@ -45,6 +52,7 @@ contract EventsOrganizer {
     // User:
 
     mapping(string => User) users;
+    // username => User
     uint256 noOfUsers;
 
     // register User
@@ -117,5 +125,24 @@ contract EventsOrganizer {
 
     function getEvent(uint256 id) public view returns (Event memory) {
         return events[id];
+    }
+
+    function buyTicket(
+        uint256 _eventId,
+        uint256 _quantity,
+        string memory _username
+    ) public {
+        // authenticate User
+        address userId = users[_username].id;
+        if (userId == 0x0000000000000000000000000000000000000000) {
+            revert("please register first");
+        }
+
+        // Check seats are available or not according to quantity
+        require(
+            events[_eventId].availableSeats >=
+                events[_eventId].soldTicketNo + _quantity,
+            "Given Quantity of ticket is not available"
+        );
     }
 }
