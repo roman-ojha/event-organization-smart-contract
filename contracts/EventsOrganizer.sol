@@ -103,7 +103,9 @@ contract EventsOrganizer {
 
     // Creating Event
     mapping(uint256 => Event) events;
-    uint256 noOfEvent;
+    uint256 noOfEvent = 1;
+
+    // event id start from 1
 
     function createEvent(
         string memory _name,
@@ -138,11 +140,28 @@ contract EventsOrganizer {
             revert("please register first");
         }
 
+        // given eventId should exist
+        require(events[_eventId].id != 0, "Event doesn't exist");
+
         // Check seats are available or not according to quantity
         require(
             events[_eventId].availableSeats >=
                 events[_eventId].soldTicketNo + _quantity,
             "Given Quantity of ticket is not available"
         );
+
+        // if user already buy the ticket for particular event and again try to buy on same event that we have to add quantity
+        if (users[_username].tickets[_eventId].eventId != 0) {
+            users[_username].tickets[_eventId].quantity += _quantity;
+            events[_eventId].availableSeats -= _quantity;
+            events[_eventId].soldTicketNo += _quantity;
+            return;
+        }
+        // create new ticket
+        Ticket storage newTicket = users[_username].tickets[_eventId];
+        newTicket.eventId = _eventId;
+        newTicket.quantity = _quantity;
+        events[_eventId].availableSeats -= _quantity;
+        events[_eventId].soldTicketNo += _quantity;
     }
 }
