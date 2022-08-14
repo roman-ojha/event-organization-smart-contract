@@ -126,6 +126,9 @@ contract EventsOrganizer {
     }
 
     function getEvent(uint256 id) public view returns (Event memory) {
+        if (events[id].id == 0) {
+            revert("Event doesn't exist");
+        }
         return events[id];
     }
 
@@ -136,8 +139,11 @@ contract EventsOrganizer {
     ) public {
         // authenticate User
         address userId = users[_username].id;
-        if (userId == 0x0000000000000000000000000000000000000000) {
-            revert("please register first");
+        if (
+            userId == 0x0000000000000000000000000000000000000000 &&
+            userId != msg.sender
+        ) {
+            revert("UnAuthorized");
         }
 
         // given eventId should exist
@@ -163,5 +169,30 @@ contract EventsOrganizer {
         newTicket.quantity = _quantity;
         events[_eventId].availableSeats -= _quantity;
         events[_eventId].soldTicketNo += _quantity;
+
+        // doest minimum ticketPrice is been send
+
+        // transfer send price into contract
+    }
+
+    function ticketInfo(uint256 _eventId, string memory _username)
+        public
+        view
+        returns (Ticket memory)
+    {
+        // authenticate User
+        address userId = users[_username].id;
+        if (
+            userId == 0x0000000000000000000000000000000000000000 &&
+            userId != msg.sender
+        ) {
+            revert("UnAuthorized");
+        }
+
+        if (events[_eventId].id == 0) {
+            revert("Event doesn't exist");
+        }
+
+        return users[_username].tickets[_eventId];
     }
 }
