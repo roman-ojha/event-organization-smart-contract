@@ -4,7 +4,7 @@ pragma solidity >=0.6.0 <0.9.0;
 
 struct Admin {
     string username;
-    address id; // user address
+    address payable id; // user address
     string password;
 }
 
@@ -37,8 +37,13 @@ contract EventsOrganizer {
 
     constructor(string memory _username, string memory _password) {
         admin.username = _username;
-        admin.id = msg.sender;
+        admin.id = payable(msg.sender);
         admin.password = _password;
+    }
+
+    modifier isAdmin() {
+        require(msg.sender == admin.id, "Permission Denied,You are not admin");
+        _;
     }
 
     function getAdmin()
@@ -113,7 +118,7 @@ contract EventsOrganizer {
         uint256 _ticketPrice,
         uint256 _date,
         uint256 _availableSeats
-    ) public {
+    ) public isAdmin {
         require(msg.sender == admin.id, "only admin can create the event");
         Event storage newEvent = events[noOfEvent];
         newEvent.id = noOfEvent;
@@ -136,11 +141,11 @@ contract EventsOrganizer {
         uint256 _eventId,
         uint256 _quantity,
         string memory _username
-    ) public {
+    ) public payable {
         // authenticate User
         address userId = users[_username].id;
         if (
-            userId == 0x0000000000000000000000000000000000000000 &&
+            userId == 0x0000000000000000000000000000000000000000 ||
             userId != msg.sender
         ) {
             revert("UnAuthorized");
@@ -148,6 +153,15 @@ contract EventsOrganizer {
 
         // given eventId should exist
         require(events[_eventId].id != 0, "Event doesn't exist");
+
+        // if deadline had passed
+        // require(block.timestamp < events[_eventId].date, "Deadline had passed");
+
+        // doest minimum ticketPrice is been send
+        require(
+            msg.value / _quantity >= events[_eventId].ticketPrice,
+            "Minimum Ticket price is not met"
+        );
 
         // Check seats are available or not according to quantity
         require(
@@ -170,9 +184,8 @@ contract EventsOrganizer {
         events[_eventId].availableSeats -= _quantity;
         events[_eventId].soldTicketNo += _quantity;
 
-        // doest minimum ticketPrice is been send
-
         // transfer send price into contract
+        // admin.id.transfer(msg.value);
     }
 
     function ticketInfo(uint256 _eventId, string memory _username)
@@ -183,7 +196,7 @@ contract EventsOrganizer {
         // authenticate User
         address userId = users[_username].id;
         if (
-            userId == 0x0000000000000000000000000000000000000000 &&
+            userId == 0x0000000000000000000000000000000000000000 ||
             userId != msg.sender
         ) {
             revert("UnAuthorized");
@@ -193,6 +206,25 @@ contract EventsOrganizer {
             revert("Event doesn't exist");
         }
 
+        if (users[_username].tickets[_eventId].eventId == 0) {
+            revert("You have to buy ticket for this particular event");
+        }
+
         return users[_username].tickets[_eventId];
+    }
+
+    function getBalance() public view isAdmin returns (uint256) {
+        return admin.id.balance;
+    }
+
+    function getContractBalance() public view isAdmin returns (uint256) {
+        return address(this).balance;
+    }
+
+    function transferBAlanceToAdmin() public isAdmin {
+        if (getContractBalance() == 0) {
+            revert("Empty contract balance");
+        }
+        admin.id.transfer(address(this).balance);
     }
 }
